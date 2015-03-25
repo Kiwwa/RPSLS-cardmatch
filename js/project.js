@@ -16,6 +16,11 @@ function randomPair(collection) {
   return result;
 }
 
+function resetTwoCards(cardOneID, cardTwoID) {
+  $("#" + cardOneID).css("background", "black");
+  $("#" + cardTwoID).css("background", "black");
+}
+
 //-----------------------------------------------------------------
 // Game Object
 //-----------------------------------------------------------------
@@ -34,87 +39,81 @@ var game = {
   },
 
   rpslsWinner: function(playerOne, playerTwo) {
-  // all logic determined from playerOne POV
 
-  if (playerOne === playerTwo) { return "draw"; }
+    // all logic determined from playerOne POV
+    if (playerOne === playerTwo) { return "draw"; }
 
-  switch (playerOne) {
-    case "rock":
-      if (_.contains(["paper", "spock"], playerTwo)) { return "lose"; }
-      else if (_.contains(["scissors", "lizard"], playerTwo)) { return "win"; }
-      else { return "error" }
-    break;
-    case "paper":
-      if (_.contains(["scissors", "lizard"], playerTwo)) { return "lose"; }
-      else if (_.contains(["rock", "spock"], playerTwo)) { return "win"; }
-      else { return "error" }
+    switch (playerOne) {
+      case "rock":
+        if (_.contains(["paper", "spock"], playerTwo)) { return "lose"; }
+        else if (_.contains(["scissors", "lizard"], playerTwo)) { return "win"; }
+        else { return "error" }
       break;
-    case "scissors":
-      if (_.contains(["rock", "spock"], playerTwo)) { return "lose"; }
-      else if (_.contains(["paper", "lizard"], playerTwo)) { return "win"; }
-      else { return "error" }
-      break;
-    case "lizard":
-      if (_.contains(["rock", "scissors"], playerTwo)) { return "lose"; }
-      else if (_.contains(["paper", "spock"], playerTwo)) { return "win"; }
-      else { return "error" }
-      break;
-    case "spock":
-      if (_.contains(["paper", "lizard"], playerTwo)) { return "lose"; }
-      else if (_.contains(["rock", "scissors"], playerTwo)) { return "win"; }
-      else { return "error" }
-      break;
+      case "paper":
+        if (_.contains(["scissors", "lizard"], playerTwo)) { return "lose"; }
+        else if (_.contains(["rock", "spock"], playerTwo)) { return "win"; }
+        else { return "error" }
+        break;
+      case "scissors":
+        if (_.contains(["rock", "spock"], playerTwo)) { return "lose"; }
+        else if (_.contains(["paper", "lizard"], playerTwo)) { return "win"; }
+        else { return "error" }
+        break;
+      case "lizard":
+        if (_.contains(["rock", "scissors"], playerTwo)) { return "lose"; }
+        else if (_.contains(["paper", "spock"], playerTwo)) { return "win"; }
+        else { return "error" }
+        break;
+      case "spock":
+        if (_.contains(["paper", "lizard"], playerTwo)) { return "lose"; }
+        else if (_.contains(["rock", "scissors"], playerTwo)) { return "win"; }
+        else { return "error" }
+        break;
     }
+  },
+
+  genCardClickListener: function(cardID) {
+    $('#' + cardID).click(function() {
+      $(this).css("background", "transparent");
+      if (game.cardOneClicked === false) {
+        game.cardOneClicked = true;
+        game.cardOneID = $( this ).attr('id');
+      } else if (game.cardOneClicked === true) {
+        var $cardOne = $( "#" + game.cardOneID );
+        var $cardTwo = $( this );
+
+        // test cards against each other
+        var flipResult = game.rpslsWinner($cardOne.text(), $cardTwo.text());
+        console.log(flipResult);
+
+        // if win:  unbind events so cards become unclickable
+        // if lose: show both card values, then after timeout set back to black
+        if (flipResult === "win") {
+          $cardOne.unbind('click');
+          $cardTwo.unbind('click');
+        } else {
+          $(this).css("background", "transparent");
+          setTimeout(function(){
+            $cardOne.css("background", "black");
+            $cardTwo.css("background", "black");
+          },800);
+        }
+        game.cardOneClicked = false;
+        game.cardOne = '';
+      }
+    });
   }
 }
 
 game.generateDeck();
 console.log(game.cards);
 
-function resetTwoCards(cardOneID, cardTwoID) {
-  $("#" + cardOneID).css("background", "black");
-  $("#" + cardTwoID).css("background", "black");
-  ;
-}
-
-function generateOnClickReveal(cardID) {
-  $('#' + cardID).click(function() {
-    $(this).css("background", "transparent");
-    if (game.cardOneClicked === false) {
-      game.cardOneClicked = true;
-      game.cardOneID = $( this ).attr('id');
-    } else if (game.cardOneClicked === true) {
-      var $cardOne = $("#" + game.cardOneID);
-      var $cardTwo = $( this );
-
-      // test cards against each other
-      var flipResult = game.rpslsWinner($cardOne.text(), $cardTwo.text());
-      console.log(flipResult);
-      if (flipResult === "win") {
-        $cardOne.unbind('click');
-        $cardTwo.unbind('click');
-      } else {
-        $(this).css("background", "transparent");
-        setTimeout(function(){
-          $cardOne.css("background", "black");
-          $cardTwo.css("background", "black");
-        },1000);
-
-      }
-      game.cardOneClicked = false;
-      game.cardOne = '';
-    }
-  });
-}
-
-
-
 $(document).ready(function() {
   for (var i = 0; i < game.cards.length; i++) {
     var boxContents = game.cards[i];
     var appendText = '<div class="card-box" id="box-' + i + '">' + boxContents + "</div>";
     $('#card-container').append(appendText);
-    generateOnClickReveal("box-" + i);
+    game.genCardClickListener("box-" + i);
   }
 });
 
