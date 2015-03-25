@@ -45,7 +45,6 @@ var game = {
       else { return "error" }
     break;
     case "paper":
-      console.log("in here");
       if (_.contains(["scissors", "lizard"], playerTwo)) { return "lose"; }
       else if (_.contains(["rock", "spock"], playerTwo)) { return "win"; }
       else { return "error" }
@@ -62,7 +61,7 @@ var game = {
       break;
     case "spock":
       if (_.contains(["paper", "lizard"], playerTwo)) { return "lose"; }
-      else if (_.contains(["rock", "spock"], playerTwo)) { return "win"; }
+      else if (_.contains(["rock", "scissors"], playerTwo)) { return "win"; }
       else { return "error" }
       break;
     }
@@ -72,10 +71,9 @@ var game = {
 game.generateDeck();
 console.log(game.cards);
 
-cardOneID = ''
-cardOneBool = false
-
-function resetTwoCards(cardOne, cardTwo) {
+function resetTwoCards(cardOneID, cardTwoID) {
+  $("#" + cardOneID).css("background", "black");
+  $("#" + cardTwoID).css("background", "black");
   ;
 }
 
@@ -86,10 +84,25 @@ function generateOnClickReveal(cardID) {
       game.cardOneClicked = true;
       game.cardOneID = $( this ).attr('id');
     } else if (game.cardOneClicked === true) {
-      var cardOneText = $("#" + game.cardOneID).text();
-      var cardTwoText = $( this ).text();
-      console.log(game.rpslsWinner(cardOneText, cardTwoText));
+      var $cardOne = $("#" + game.cardOneID);
+      var $cardTwo = $( this );
 
+      // test cards against each other
+      var flipResult = game.rpslsWinner($cardOne.text(), $cardTwo.text());
+      console.log(flipResult);
+      if (flipResult === "win") {
+        $cardOne.unbind('click');
+        $cardTwo.unbind('click');
+      } else {
+        $(this).css("background", "transparent");
+        setTimeout(function(){
+          $cardOne.css("background", "black");
+          $cardTwo.css("background", "black");
+        },1000);
+
+      }
+      game.cardOneClicked = false;
+      game.cardOne = '';
     }
   });
 }
@@ -103,6 +116,5 @@ $(document).ready(function() {
     $('#card-container').append(appendText);
     generateOnClickReveal("box-" + i);
   }
-
 });
 
