@@ -96,7 +96,7 @@ var game = {
           setTimeout(function(){
             $cardOne.css("background", "black");
             $cardTwo.css("background", "black");
-          },800);
+          },5000);
         }
         game.cardOneClicked = false;
         game.cardOne = '';
