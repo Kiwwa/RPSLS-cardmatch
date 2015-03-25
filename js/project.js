@@ -24,6 +24,8 @@ var game = {
   NUM_CARDS: 20,
   CARD_OPTIONS: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
   cards: [],
+  cardOne: '',
+  cardOneClicked: false,
 
   generateDeck: function() {
     for (var i = 0; i < Math.floor(this.NUM_CARDS) / 2; i++) {
@@ -70,11 +72,37 @@ var game = {
 game.generateDeck();
 console.log(game.cards);
 
-$(document).ready(function(){
+cardOneID = ''
+cardOneBool = false
+
+function resetTwoCards(cardOne, cardTwo) {
+  ;
+}
+
+function generateOnClickReveal(cardID) {
+  $('#' + cardID).click(function() {
+    $(this).css("background", "transparent");
+    if (game.cardOneClicked === false) {
+      game.cardOneClicked = true;
+      game.cardOneID = $( this ).attr('id');
+    } else if (game.cardOneClicked === true) {
+      var cardOneText = $("#" + game.cardOneID).text();
+      var cardTwoText = $( this ).text();
+      console.log(game.rpslsWinner(cardOneText, cardTwoText));
+
+    }
+  });
+}
+
+
+
+$(document).ready(function() {
   for (var i = 0; i < game.cards.length; i++) {
     var boxContents = game.cards[i];
     var appendText = '<div class="card-box" id="box-' + i + '">' + boxContents + "</div>";
     $('#card-container').append(appendText);
+    generateOnClickReveal("box-" + i);
   }
+
 });
 
