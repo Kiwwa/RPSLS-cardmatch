@@ -26,7 +26,7 @@ function resetTwoCards(cardOneID, cardTwoID) {
 //-----------------------------------------------------------------
 
 var game = {
-  NUM_CARDS: 20,
+  NUM_CARDS: 24,
   CARD_OPTIONS: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
   cards: [],
   cardOne: '',
@@ -72,7 +72,7 @@ var game = {
     }
   },
 
-  genCardClickListener: function(cardID) {
+  generateCardClickListener: function(cardID) {
     $('#' + cardID).click(function() {
       $(this).css("background", "transparent");
       if (game.cardOneClicked === false) {
@@ -113,7 +113,7 @@ $(document).ready(function() {
     var boxContents = game.cards[i];
     var appendText = '<div class="card-box" id="box-' + i + '">' + boxContents + "</div>";
     $('#card-container').append(appendText);
-    game.genCardClickListener("box-" + i);
+    game.generateCardClickListener("box-" + i);
   }
 });
 

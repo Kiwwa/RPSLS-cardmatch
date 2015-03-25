@@ -61,25 +61,38 @@ html {
 ------------------------*/
 
 #container {
-  border: 4px solid #000000;
 }
 
 #header {
-  border: 2px solid black;
+  height: 5em;
+  line-height: 5em;
+  vertical-align: center;
+  background-color: #D7263D;
+  border-bottom: 2px dashed black;
 }
 
 #card-container {
-  border: 2px solid black;
+  background-color: #68C5DB;
+  border-bottom: 2px dashed black;
 }
 
 #footer {
   background-color: white;
-  border: 5px solid red;
 }
 
 /*------------------------
   Individual Elements
 ------------------------*/
+
+h1 {
+  padding-left: 0.6em;
+  font-size: 3em;
+  font-family: 'Lobster', cursive;
+}
+
+#footer p {
+  padding: 0.8em 0 0.5em 1em;
+}
 
 .card-box {
   position: relative;
