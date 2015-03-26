@@ -21,6 +21,10 @@ function resetTwoCards(cardOneID, cardTwoID) {
   $("#" + cardTwoID).css("background", "black");
 }
 
+function generateOnClick(id, callback) {
+  $("#" + id).on('click', callback);
+}
+
 //-----------------------------------------------------------------
 // Game Object
 //-----------------------------------------------------------------
@@ -134,22 +138,14 @@ $(document).ready(function() {
     game.generateCardClickListener("box-" + i);
   }
 
-  $("#singleplayer").on('click', function() {
-    game.singleplayerInit();
-  });
-
-  $('#multiplayer').on('click', function() {
+  // starting game menu-system
+  generateOnClick('singleplayer', function() { game.singleplayerInit(); });
+  generateOnClick('multiplayer', function() {
     $("#hover-1").hide();
     $("#hover-2").show();
   });
-
-  $('#host-multi').on('click', function() {
-    game.multiplayerHostInit();
-  });
-
-  $('#join-multi').on('click', function() {
-    game.multiplayerJoinInit();
-  });
+  generateOnClick('host-multi', function() { game.multiplayerHostInit(); });
+  generateOnClick('join-multi', function() { game.multiplayerJoinInit(); });
 
 });
 
