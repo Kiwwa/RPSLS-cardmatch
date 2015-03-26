@@ -25,6 +25,36 @@ function generateOnClick(id, callback) {
   $("#" + id).on('click', callback);
 }
 
+function makeid(len)
+{
+  var result = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for( var i=0; i < len; i++ )
+      result += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return result;
+}
+
+function multiplayerInit() {
+  var fireBaseDB = new Firebase('https://burning-fire-8027.firebaseio.com/');
+  game.generateDeck();
+  console.log(game.cards);
+  game.multiplayerID = makeid(5);
+
+  fireBaseDB.set({
+    game: {
+      cards: game.cards,
+      gameID: game.multiplayerID,
+      players: {
+        name: "Luke",
+        color: "orange",
+
+      }
+    }
+  });
+}
+
 //-----------------------------------------------------------------
 // Game Object
 //-----------------------------------------------------------------
@@ -35,6 +65,7 @@ var game = {
   cards: [],
   cardOne: '',
   cardOneClicked: false,
+  multiplayerID: '',
 
   generateDeck: function() {
     for (var i = 0; i < Math.floor(this.NUM_CARDS) / 2; i++) {
@@ -127,8 +158,7 @@ var game = {
   }
 }
 
-game.generateDeck();
-console.log(game.cards);
+multiplayerInit();
 
 $(document).ready(function() {
   for (var i = 0; i < game.cards.length; i++) {
