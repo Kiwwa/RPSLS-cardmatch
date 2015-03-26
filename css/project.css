@@ -148,3 +148,7 @@ h1 {
   height: 100%;
   background-color: rgba(130, 169, 208, 0.5);
 }
+
+#hover-2 {
+  display: none;
+}

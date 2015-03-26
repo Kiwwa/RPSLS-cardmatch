@@ -110,9 +110,15 @@ var game = {
     $("#hover-background").hide();
   },
 
-  multiplayerInit: function() {
+  multiplayerJoinInit: function() {
     console.log("multiplayer");
-    $("#hover-1").hide();
+    $("#hover-2").hide();
+    $("#hover-background").hide();
+  },
+
+  multiplayerHostInit: function() {
+    console.log("multiplayer");
+    $("#hover-2").hide();
     $("#hover-background").hide();
   }
 }
@@ -133,7 +139,17 @@ $(document).ready(function() {
   });
 
   $('#multiplayer').on('click', function() {
-    game.multiplayerInit();
-  })
+    $("#hover-1").hide();
+    $("#hover-2").show();
+  });
+
+  $('#host-multi').on('click', function() {
+    game.multiplayerHostInit();
+  });
+
+  $('#join-multi').on('click', function() {
+    game.multiplayerJoinInit();
+  });
+
 });
 
