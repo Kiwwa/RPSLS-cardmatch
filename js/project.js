@@ -13,7 +13,9 @@ function genericOnClick(id, callback) {
 }
 
 function fireBaseValue(DB, path, callback) {
-  result = DB.child(path).on('value', callback);
+  var ref = DB.child(path);
+  var result = ref.on('value', callback);
+  ref.off();
   return result;
 }
 
@@ -26,8 +28,7 @@ function randomPair(collection) {
   return result;
 }
 
-function makeid(len)
-{
+function makeid(len) {
   var result = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   for( var i=0; i < len; i++ )
@@ -35,17 +36,62 @@ function makeid(len)
   return result;
 }
 
+function flipCard(id) {
+  $(this).css("background", "transparent");
+}
+
 //-----------------------------------------------------------------
 // Game Object
 //-----------------------------------------------------------------
 
 var game = {
-  NUM_CARDS: 24,
+  NUM_CARDS: 20,
   CARD_OPTIONS: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
+  PLAYER_COLORS: ["Black", "Navy", "DarkBlue", "MediumBlue", "Blue",
+    "DarkGreen", "Green", "Teal", "DarkCyan", "DeepSkyBlue",
+    "DarkTurquoise", "MediumSpringGreen", "Lime", "SpringGreen",
+    "Aqua", "Cyan", "MidnightBlue", "DodgerBlue",
+    "LightSeaGreen", "ForestGreen", "SeaGreen",
+    "DarkSlateGray", "LimeGreen", "MediumSeaGreen",
+    "Turquoise", "RoyalBlue", "SteelBlue", "DarkSlateBlue",
+    "MediumTurquoise", "Indigo", "DarkOliveGreen",
+    "CadetBlue", "CornflowerBlue", "RebeccaPurple",
+    "MediumAquaMarine", "DimGray", "SlateBlue", "OliveDrab",
+    "SlateGray", "LightSlateGray", "MediumSlateBlue",
+    "LawnGreen", "Chartreuse", "Aquamarine", "Maroon",
+    "Purple", "Olive", "Gray", "SkyBlue", "LightSkyBlue",
+    "BlueViolet", "DarkRed", "DarkMagenta", "SaddleBrown",
+    "DarkSeaGreen", "LightGreen", "MediumPurple", "DarkViolet",
+    "PaleGreen", "DarkOrchid", "YellowGreen", "Sienna",
+    "Brown", "DarkGray", "LightBlue", "GreenYellow",
+    "PaleTurquoise", "LightSteelBlue", "PowderBlue",
+    "FireBrick", "DarkGoldenRod", "MediumOrchid", "RosyBrown",
+    "DarkKhaki", "Silver", "MediumVioletRed", "IndianRed",
+    "Peru", "Chocolate", "Tan", "LightGray", "Thistle",
+    "Orchid", "GoldenRod", "PaleVioletRed", "Crimson",
+    "Gainsboro", "Plum", "BurlyWood", "LightCyan",
+    "Lavender", "DarkSalmon", "Violet", "PaleGoldenRod",
+    "LightCoral", "Khaki", "AliceBlue", "HoneyDew",
+    "Azure", "SandyBrown", "Wheat", "Beige", "WhiteSmoke",
+    "MintCream", "GhostWhite", "Salmon", "AntiqueWhite",
+    "Linen", "LightGoldenRodYellow", "OldLace", "Red",
+    "Fuchsia", "Magenta", "DeepPink", "OrangeRed", "Tomato",
+    "HotPink", "Coral", "DarkOrange", "LightSalmon",
+    "Orange", "LightPink", "Pink", "Gold", "PeachPuff",
+    "NavajoWhite", "Moccasin", "Bisque", "MistyRose",
+    "BlanchedAlmond", "PapayaWhip", "LavenderBlush",
+    "SeaShell", "Cornsilk", "LemonChiffon", "FloralWhite",
+    "Snow", "Yellow", "LightYellow", "Ivory", "White"
+  ],
+  PLAYER_ANIMALS: ['dog', 'cat', 'elephant', 'ardvark', 'horse', 'alligator',
+    "ant", "bird"
+  ],
   cards: [],
   cardOne: '',
   cardOneClicked: false,
   multiplayerID: '',
+  playerColor: '',
+  playerAnimal: '',
 
   generateDeck: function() {
     for (var i = 0; i < Math.floor(this.NUM_CARDS) / 2; i++) {
@@ -90,6 +136,10 @@ var game = {
   generateCardClickListener: function(cardID) {
     $('#' + cardID).click(function() {
       game.cardShow(this);
+      var cardUpdateObj = {};
+      cardUpdateObj[cardID] = game.playerColor;
+
+      fireBaseDB.child( game.multiplayerID + "/flips" ).update(cardUpdateObj);
       $(this).css("background", "transparent");
       if (game.cardOneClicked === false) {
         game.cardOneClicked = true;
@@ -100,7 +150,6 @@ var game = {
 
         // test cards against each other
         var flipResult = game.rpslsWinner($cardOne.text(), $cardTwo.text());
-        console.log(flipResult);
 
         // if win:  unbind events so cards become unclickable
         // if lose: show both card values, then after timeout set back to black
@@ -144,12 +193,21 @@ var game = {
     $("#hover-3").show();
     $('#submit-join-gameid').on('click', function() {
       game.multiplayerID = $("#join-game-textbox").val();
-      $("#hover-background").hide();
       $("#hover-3").hide();
       fireBaseValue(fireBaseDB, game.multiplayerID, function(snapshot){
         game.cards = snapshot.val().deck;
         game.displayCards();
       });
+
+      // this is here to allow the Listener time to catch up to the
+      // board update above; otherwise listeners fail to attach
+      //   TODO: This is a bad solution.
+      //   TODO: Actually, now that we don't allow clicks until AFTER
+      //         the listeners are setup, I don't mind it so much...
+      setTimeout(function(){
+        game.multiplayerListeners();
+        $("#hover-background").hide();
+      },1000);
     });
   },
 
@@ -157,19 +215,31 @@ var game = {
     game.multiplayerID = makeid(5);
     var gameObject = {
       deck: game.cards,
-      flips: game.cards,
     }
-    fireBaseDB.child(game.multiplayerID).set(gameObject);
+
+    // set the deck for others to sync with
+    fireBaseDB.child(game.multiplayerID).update(gameObject);
 
     $("h1").text("RPSLS - GameID #" + game.multiplayerID);
     $("#hover-2").hide();
     $("#hover-background").hide();
+    game.multiplayerListeners();
+  },
+
+  multiplayerListeners: function() {
+    fireBaseDB.child(game.multiplayerID + "/flips").on("child_added", function(snapshot) {
+      var targetDiv = "#" + snapshot.key();
+      console.log(targetDiv, snapshot.val());
+      $("#" + snapshot.key()).css("border", '4px solid ' + snapshot.val());
+    });
   }
 }
 
 $(document).ready(function() {
   game.generateDeck();
   game.displayCards();
+  game.playerColor = _.sample(game.PLAYER_COLORS);
+  game.playerAnimal = _.sample(game.PLAYER_ANIMALS);
 
   // starting game menu-system
   genericOnClick('singleplayer', function() { game.singleplayerInit(); });
