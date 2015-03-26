@@ -102,6 +102,18 @@ var game = {
         game.cardOne = '';
       }
     });
+  },
+
+  singleplayerInit: function() {
+    console.log("singleplayer");
+    $("#hover-1").hide();
+    $("#hover-background").hide();
+  },
+
+  multiplayerInit: function() {
+    console.log("multiplayer");
+    $("#hover-1").hide();
+    $("#hover-background").hide();
   }
 }
 
@@ -115,5 +127,13 @@ $(document).ready(function() {
     $('#card-container').append(appendText);
     game.generateCardClickListener("box-" + i);
   }
+
+  $("#singleplayer").on('click', function() {
+    game.singleplayerInit();
+  });
+
+  $('#multiplayer').on('click', function() {
+    game.multiplayerInit();
+  })
 });
 

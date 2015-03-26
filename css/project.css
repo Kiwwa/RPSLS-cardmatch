@@ -16,6 +16,10 @@ html {
   box-sizing: inherit;
 }
 
+body {
+  position: absolute;
+}
+
 /*------------------------
   DIV span sizings
 ------------------------*/
@@ -94,6 +98,10 @@ h1 {
   padding: 0.8em 0 0.5em 1em;
 }
 
+#card-container {
+  text-align: center;
+}
+
 .card-box {
   position: relative;
   display: inline-block;
@@ -102,7 +110,7 @@ h1 {
   min-width: 150px;
   max-width: 150px;
   border: 2px solid black;
-  margin: 0.5em 0.5em;
+  margin: 0.5em 0.7em;
   z-index: 1;
   line-height: 240px;
   text-align: center;
@@ -113,3 +121,30 @@ h1 {
           transition: all 0.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
 }
 
+.hover-box {
+  z-index: 10;
+  height: 200px;
+  width: 300px;
+  line-height: 200px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid black;
+  text-align: center;
+  -webkit-transition: all 0.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+     -moz-transition: all 0.3s ease-out;  /* Firefox 4-15 */
+       -o-transition: all 0.3s ease-out;  /* Opera 10.50–12.00 */
+          transition: all 0.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
+}
+
+#hover-background {
+  z-index: 9;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(130, 169, 208, 0.5);
+}
