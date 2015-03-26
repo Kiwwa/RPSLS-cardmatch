@@ -45,7 +45,7 @@ function flipCard(id) {
 //-----------------------------------------------------------------
 
 var game = {
-  NUM_CARDS: 20,
+  NUM_CARDS: 40,
   CARD_OPTIONS: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
   PLAYER_COLORS: ["Black", "Navy", "DarkBlue", "MediumBlue", "Blue",
     "DarkGreen", "Green", "Teal", "DarkCyan", "DeepSkyBlue",
@@ -81,11 +81,9 @@ var game = {
     "NavajoWhite", "Moccasin", "Bisque", "MistyRose",
     "BlanchedAlmond", "PapayaWhip", "LavenderBlush",
     "SeaShell", "Cornsilk", "LemonChiffon", "FloralWhite",
-    "Snow", "Yellow", "LightYellow", "Ivory", "White"
-  ],
+    "Snow", "Yellow", "LightYellow", "Ivory", "White"],
   PLAYER_ANIMALS: ['dog', 'cat', 'elephant', 'ardvark', 'horse', 'alligator',
-    "ant", "bird"
-  ],
+    "ant", "bird"],
   cards: [],
   cardOne: '',
   cardOneClicked: false,
@@ -154,11 +152,22 @@ var game = {
         // if win:  unbind events so cards become unclickable
         // if lose: show both card values, then after timeout set back to black
         if (flipResult === "win") {
+
+          // Update cards to go transparent if won on ANY machine
+          var wonCardOne = {};
+          wonCardOne[$cardOne.attr('id')] = game.playerColor;
+          fireBaseDB.child( game.multiplayerID + "/won/" ).update(wonCardOne);
+
+          var wonCardTwo = {};
+          wonCardTwo[$cardTwo.attr('id')] = game.playerColor;
+          fireBaseDB.child( game.multiplayerID + "/won/" ).update(wonCardTwo);
           $cardOne.unbind('click');
           $cardTwo.unbind('click');
         } else {
           $(this).css("background", "transparent");
           setTimeout(function(){
+            fireBaseDB.child(game.multiplayerID + "/flips/" + $cardOne.attr('id')).remove();
+            fireBaseDB.child(game.multiplayerID + "/flips/" + $cardTwo.attr('id')).remove();
             $cardOne.css("background", "black");
             $cardTwo.css("background", "black");
           },700);
@@ -229,9 +238,23 @@ var game = {
   multiplayerListeners: function() {
     fireBaseDB.child(game.multiplayerID + "/flips").on("child_added", function(snapshot) {
       var targetDiv = "#" + snapshot.key();
-      console.log(targetDiv, snapshot.val());
+      console.log("ADDING: ", targetDiv, snapshot.val());
       $("#" + snapshot.key()).css("border", '4px solid ' + snapshot.val());
     });
+
+    fireBaseDB.child(game.multiplayerID + "/flips").on("child_removed", function(snapshot){
+      var targetDiv = "#" + snapshot.key();
+      console.log("REMOVE: ", targetDiv, snapshot.val());
+      $("#" + snapshot.key()).css("border", '2px solid black');
+    });
+
+
+    fireBaseDB.child(game.multiplayerID + "/won").on("child_added", function(snapshot){
+      var targetDiv = "#" + snapshot.key();
+      console.log("CARDWON: ", targetDiv, snapshot.val());
+      $("#" + snapshot.key()).css("background", 'transparent');
+    });
+
   }
 }
 
