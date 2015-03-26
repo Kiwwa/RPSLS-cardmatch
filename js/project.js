@@ -2,10 +2,20 @@
 // Constants and Globals
 //-----------------------------------------------------------------
 
+var fireBaseDB = new Firebase('https://burning-fire-8027.firebaseio.com/');
 
 //-----------------------------------------------------------------
 // Helper Functions
 //-----------------------------------------------------------------
+
+function genericOnClick(id, callback) {
+  $("#" + id).on('click', callback);
+}
+
+function fireBaseValue(DB, path, callback) {
+  result = DB.child(path).on('value', callback);
+  return result;
+}
 
 function randomPair(collection) {
   var result = [];
@@ -16,43 +26,13 @@ function randomPair(collection) {
   return result;
 }
 
-function resetTwoCards(cardOneID, cardTwoID) {
-  $("#" + cardOneID).css("background", "black");
-  $("#" + cardTwoID).css("background", "black");
-}
-
-function generateOnClick(id, callback) {
-  $("#" + id).on('click', callback);
-}
-
 function makeid(len)
 {
   var result = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   for( var i=0; i < len; i++ )
       result += possible.charAt(Math.floor(Math.random() * possible.length));
-
   return result;
-}
-
-function multiplayerInit() {
-  var fireBaseDB = new Firebase('https://burning-fire-8027.firebaseio.com/');
-  game.generateDeck();
-  console.log(game.cards);
-  game.multiplayerID = makeid(5);
-
-  fireBaseDB.set({
-    game: {
-      cards: game.cards,
-      gameID: game.multiplayerID,
-      players: {
-        name: "Luke",
-        color: "orange",
-
-      }
-    }
-  });
 }
 
 //-----------------------------------------------------------------
@@ -109,6 +89,7 @@ var game = {
 
   generateCardClickListener: function(cardID) {
     $('#' + cardID).click(function() {
+      game.cardShow(this);
       $(this).css("background", "transparent");
       if (game.cardOneClicked === false) {
         game.cardOneClicked = true;
@@ -139,43 +120,64 @@ var game = {
     });
   },
 
+  displayCards: function() {
+    $("#card-container").empty();
+    for (var i = 0; i < game.cards.length; i++) {
+      var boxContents = game.cards[i];
+      var appendText = '<div class="card-box" id="box-' + i + '">' + boxContents + "</div>";
+      $('#card-container').append(appendText);
+      game.generateCardClickListener("box-" + i);
+    }
+  },
+
+  cardShow: function($card) {
+    $($card).css("background", "transparent");
+  },
+
   singleplayerInit: function() {
-    console.log("singleplayer");
     $("#hover-1").hide();
     $("#hover-background").hide();
   },
 
   multiplayerJoinInit: function() {
-    console.log("multiplayer");
     $("#hover-2").hide();
-    $("#hover-background").hide();
+    $("#hover-3").show();
+    $('#submit-join-gameid').on('click', function() {
+      game.multiplayerID = $("#join-game-textbox").val();
+      $("#hover-background").hide();
+      $("#hover-3").hide();
+      fireBaseValue(fireBaseDB, game.multiplayerID, function(snapshot){
+        game.cards = snapshot.val().deck;
+        game.displayCards();
+      });
+    });
   },
 
   multiplayerHostInit: function() {
-    console.log("multiplayer");
+    game.multiplayerID = makeid(5);
+    var gameObject = {
+      deck: game.cards,
+      flips: game.cards,
+    }
+    fireBaseDB.child(game.multiplayerID).set(gameObject);
+
+    $("h1").text("RPSLS - GameID #" + game.multiplayerID);
     $("#hover-2").hide();
     $("#hover-background").hide();
   }
 }
 
-multiplayerInit();
-
 $(document).ready(function() {
-  for (var i = 0; i < game.cards.length; i++) {
-    var boxContents = game.cards[i];
-    var appendText = '<div class="card-box" id="box-' + i + '">' + boxContents + "</div>";
-    $('#card-container').append(appendText);
-    game.generateCardClickListener("box-" + i);
-  }
+  game.generateDeck();
+  game.displayCards();
 
   // starting game menu-system
-  generateOnClick('singleplayer', function() { game.singleplayerInit(); });
-  generateOnClick('multiplayer', function() {
+  genericOnClick('singleplayer', function() { game.singleplayerInit(); });
+  genericOnClick('multiplayer', function() {
     $("#hover-1").hide();
     $("#hover-2").show();
   });
-  generateOnClick('host-multi', function() { game.multiplayerHostInit(); });
-  generateOnClick('join-multi', function() { game.multiplayerJoinInit(); });
-
+  genericOnClick('host-multi', function() { game.multiplayerHostInit(); });
+  genericOnClick('join-multi', function() { game.multiplayerJoinInit(); });
 });
 
