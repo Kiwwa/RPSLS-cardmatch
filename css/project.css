@@ -20,6 +20,12 @@ body {
   position: absolute;
 }
 
+img {
+  visibility: hidden;
+  width: 100px;
+  height: 100px;
+}
+
 /*------------------------
   DIV span sizings
 ------------------------*/
@@ -100,6 +106,11 @@ h1 {
 
 #card-container {
   text-align: center;
+  background: url(../img/content-background.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+     -moz-background-size: cover;
+       -o-background-size: cover;
+          background-size: cover;
 }
 
 .card-box {

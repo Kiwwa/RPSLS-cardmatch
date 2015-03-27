@@ -139,6 +139,7 @@ var game = {
 
       fireBaseDB.child( game.multiplayerID + "/flips" ).update(cardUpdateObj);
       $(this).css("background", "transparent");
+      $(this).find("img").css("visibility", "visible");
       if (game.cardOneClicked === false) {
         game.cardOneClicked = true;
         game.cardOneID = $( this ).attr('id');
@@ -147,7 +148,7 @@ var game = {
         var $cardTwo = $( this );
 
         // test cards against each other
-        var flipResult = game.rpslsWinner($cardOne.text(), $cardTwo.text());
+        var flipResult = game.rpslsWinner($cardOne.find("img").attr("id"), $cardTwo.find("img").attr("id"));
 
         // if win:  unbind events so cards become unclickable
         // if lose: show both card values, then after timeout set back to black
@@ -169,7 +170,9 @@ var game = {
             fireBaseDB.child(game.multiplayerID + "/flips/" + $cardOne.attr('id')).remove();
             fireBaseDB.child(game.multiplayerID + "/flips/" + $cardTwo.attr('id')).remove();
             $cardOne.css("background", "black");
+            $cardOne.find("img").css("visibility", "hidden");
             $cardTwo.css("background", "black");
+            $cardTwo.find("img").css("visibility", "hidden");
           },700);
         }
         game.cardOneClicked = false;
@@ -180,9 +183,18 @@ var game = {
 
   displayCards: function() {
     $("#card-container").empty();
+
+    var cardImages = {
+      rock: "img/rock.png",
+      paper: "img/paper.png",
+      scissors: "img/scissors.png",
+      lizard: "img/lizard.png",
+      spock: "img/spock.png"
+    }
+
     for (var i = 0; i < game.cards.length; i++) {
       var boxContents = game.cards[i];
-      var appendText = '<div class="card-box" id="box-' + i + '">' + boxContents + "</div>";
+      var appendText = '<div class="card-box" id="box-' + i + '"><img src=" ' + cardImages[game.cards[i]] + '" id="' + game.cards[i] + '"></div>';
       $('#card-container').append(appendText);
       game.generateCardClickListener("box-" + i);
     }
@@ -198,15 +210,28 @@ var game = {
   },
 
   multiplayerJoinInit: function() {
+    console.log("testing");
     $("#hover-2").hide();
     $("#hover-3").show();
     $('#submit-join-gameid').on('click', function() {
       game.multiplayerID = $("#join-game-textbox").val();
       $("#hover-3").hide();
-      fireBaseValue(fireBaseDB, game.multiplayerID, function(snapshot){
-        game.cards = snapshot.val().deck;
-        game.displayCards();
+
+      // sync the board for this local instance from the DB
+      var ref = fireBaseDB.child(game.multiplayerID);
+      ref.on('value', function(snapshot){
+        setTimeout(function(){
+          game.cards = snapshot.val().deck;
+          game.displayCards();
+        }, 400);
       });
+
+      // MORE timeout code ensuring that we don't remove the link before
+      // downloading the data to sync the board.
+      //        TODO: This is a serious issue now.
+      setTimeout(function(){
+        ref.off();
+      }, 500);
 
       // this is here to allow the Listener time to catch up to the
       // board update above; otherwise listeners fail to attach
@@ -216,7 +241,7 @@ var game = {
       setTimeout(function(){
         game.multiplayerListeners();
         $("#hover-background").hide();
-      },1000);
+      },1200);
     });
   },
 
@@ -252,7 +277,9 @@ var game = {
     fireBaseDB.child(game.multiplayerID + "/won").on("child_added", function(snapshot){
       var targetDiv = "#" + snapshot.key();
       console.log("CARDWON: ", targetDiv, snapshot.val());
-      $("#" + snapshot.key()).css("background", 'transparent');
+      $("#" + snapshot.key()).css("background", snapshot.val());
+      $("#" + snapshot.key()).css("border", '2px solid black');
+      $("#" + snapshot.key()).find('img').css("visibility", "visible");
     });
 
   }
