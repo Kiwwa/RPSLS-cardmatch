@@ -194,7 +194,7 @@ var game = {
 
     for (var i = 0; i < game.cards.length; i++) {
       var boxContents = game.cards[i];
-      var appendText = '<div class="card-box" id="box-' + i + '"><img src=" ' + cardImages[game.cards[i]] + '" id="' + game.cards[i] + '"></div>';
+      var appendText = '<div class="card-box" id="box-' + i + '"><img src="' + cardImages[game.cards[i]] + '" id="' + game.cards[i] + '"></div>';
       $('#card-container').append(appendText);
       game.generateCardClickListener("box-" + i);
     }
