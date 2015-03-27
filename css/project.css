@@ -21,9 +21,10 @@ body {
 }
 
 img {
+  padding-top: 30px;
   visibility: hidden;
-  width: 100px;
-  height: 100px;
+  width: 115px;
+  height: 115px;
 }
 
 /*------------------------
@@ -116,14 +117,14 @@ h1 {
 .card-box {
   position: relative;
   display: inline-block;
-  min-height: 240px;
-  max-height: 240px;
+  min-height: 150px;
+  max-height: 150px;
   min-width: 150px;
   max-width: 150px;
   border: 2px solid black;
   margin: 0.5em 0.7em;
   z-index: 1;
-  line-height: 240px;
+  line-height: 150px;
   text-align: center;
   background-color: black;
   -webkit-transition: all 0.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
@@ -134,9 +135,9 @@ h1 {
 
 .hover-box {
   z-index: 10;
-  height: 200px;
-  width: 300px;
-  line-height: 200px;
+  height: 100px;
+  width: 250px;
+  line-height: 100px;
   position: fixed;
   top: 50%;
   left: 50%;

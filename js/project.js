@@ -131,6 +131,10 @@ var game = {
     }
   },
 
+  rpslsText: function(playerOne) {
+
+  },
+
   generateCardClickListener: function(cardID) {
     $('#' + cardID).click(function() {
       game.cardShow(this);
