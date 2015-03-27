@@ -340,4 +340,3 @@ $(document).ready(function() {
   genericOnClick('host-multi', function() { game.multiplayerHostInit(); });
   genericOnClick('join-multi', function() { game.multiplayerJoinInit(); });
 });
-
