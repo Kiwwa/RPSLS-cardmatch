@@ -131,8 +131,32 @@ var game = {
     }
   },
 
-  rpslsText: function(playerOne) {
-
+  rpslsWinText: function(playerOne, playerTwo) {
+    console.log("got into rpslsWinText")
+    console.log(playerOne, playerTwo);
+    switch (playerOne) {
+      case "rock":
+        if (playerTwo == "scissors") { return "Rock smashes Scissors." }
+        else if (playerTwo == "lizard") { return "Rock crushes Lizard." }
+      break;
+      case "paper":
+        if (playerTwo == "rock") { return "Paper covers Rock." }
+        else if (playerTwo == "spock") { return "Paper disproves Spock." }
+      break;
+      case "scissors":
+        if (playerTwo == "paper") { return "Scissors cuts Paper." }
+        else if (playerTwo == "lizard") { return "Scissors decapitates Lizard." }
+        break;
+      case "lizard":
+        if (playerTwo == "paper") { return "Lizard eats Paper." }
+        else if (playerTwo == "spock") { return "Lizard poisons Spock." }
+        break;
+      case "spock":
+        if (playerTwo == "rock") { return "Spock vaporizes Rock." }
+        else if (playerTwo == "scissors") { return "Spock smashes Scissors." }
+        break;
+    }
+    return "error";
   },
 
   generateCardClickListener: function(cardID) {
@@ -157,6 +181,17 @@ var game = {
         // if win:  unbind events so cards become unclickable
         // if lose: show both card values, then after timeout set back to black
         if (flipResult === "win") {
+
+          // display win-text on screen for 1.5 seconds
+          var winResultText = game.rpslsWinText($cardOne.find("img").attr("id"), $cardTwo.find("img").attr("id"));
+          console.log(winResultText);
+
+          $("#large-textbox").css("visibility", "visible");
+          $("#large-textbox").text(winResultText);
+          setTimeout(function(){
+            $("#large-textbox").css("visibility", "hidden");
+            $("#large-textbox").empty();
+          }, 1500);
 
           // Update cards to go transparent if won on ANY machine
           var wonCardOne = {};
@@ -293,6 +328,7 @@ $(document).ready(function() {
   game.generateDeck();
   game.displayCards();
   game.playerColor = _.sample(game.PLAYER_COLORS);
+  $('#header').css('background-color', game.playerColor);
   game.playerAnimal = _.sample(game.PLAYER_ANIMALS);
 
   // starting game menu-system
